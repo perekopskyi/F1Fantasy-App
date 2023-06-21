@@ -7,11 +7,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
   app.setGlobalPrefix('api/v1');
-  setupSwaggerDocumentaion(app);
+  setupSwaggerDocumentation(app);
   await app.listen(3000);
 }
 
-function setupSwaggerDocumentaion(app: INestApplication) {
+function setupSwaggerDocumentation(app: INestApplication) {
   const config = new DocumentBuilder()
     .setTitle('F1 fantasy app')
     .setDescription('API description')
