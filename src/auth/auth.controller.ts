@@ -29,13 +29,12 @@ export class AuthController {
       throw new BadRequestException();
     }
 
-    const payload = this.authService.getJwtToken(user.id);
-    await this.authService.saveAccessToken(payload);
+    const token = this.authService.getJwtToken(user.id);
 
     return {
       success: true,
       data: {
-        access_token: payload.token,
+        access_token: token,
       },
     };
   }

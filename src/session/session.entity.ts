@@ -12,14 +12,10 @@ export class SessionEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true })
-  token: string;
+  @Column()
+  currentHashedRefreshToken: string;
 
-  // TODO Refresh token
-  // @Column()
-  // currentHashedRefreshToken: string;
-
-  @OneToOne(() => UserEntity, (user) => user.id)
+  @OneToOne(() => UserEntity)
   @JoinColumn()
-  user: number;
+  user: UserEntity;
 }

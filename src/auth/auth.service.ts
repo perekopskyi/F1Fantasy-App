@@ -3,6 +3,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
@@ -10,14 +11,16 @@ import { Repository } from 'typeorm';
 import { instanceToPlain } from 'class-transformer';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { ActiveToken, TokenPayload } from './interfaces/payload.interface';
+import { TokenPayload } from './interfaces/payload.interface';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SessionEntity } from '../session/session.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
+    private readonly configService: ConfigService,
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     @InjectRepository(SessionEntity)
@@ -66,33 +69,44 @@ export class AuthService {
     }
   }
 
-  getJwtToken(userId: number): ActiveToken {
+  getJwtToken(userId: number): string {
     const payload: TokenPayload = { userId };
-    const token = this.jwtService.sign(payload, { expiresIn: '1h' });
-    return { userId, token };
+    return this.jwtService.sign(payload);
   }
 
-  async validateUser(payload: ActiveToken) {
-    const activeToken = await this.sessionRepository.findOne({
-      where: { token: payload.token },
-    });
-
-    const user = await this.usersService.findById(activeToken.user);
+  async validateUser({ userId }: TokenPayload) {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('Invalid token');
+    }
     return instanceToPlain(user);
   }
 
   async invalidateAccessToken(token: string): Promise<void> {
-    // Find and remove active access token
-    const activeToken = await this.sessionRepository.findOne({
-      where: { token },
-    });
-    await this.sessionRepository.delete(activeToken.id);
+    console.log('🚀 TODO ~> AuthService ~> invalidateAccessToken:', token);
   }
 
-  async saveAccessToken(activeToken: ActiveToken) {
-    const createdActiveToken = this.sessionRepository.create({
-      ...activeToken,
+  public getJwtRefreshToken(userId: number) {
+    // TODO
+    const payload: TokenPayload = { userId };
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+      expiresIn: `${this.configService.get(
+        'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
+      )}s`,
     });
-    await this.sessionRepository.save(createdActiveToken);
+    // await this.sessionRepository.save(refreshToken)
+    return { refreshToken };
+  }
+
+  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+    const user = await this.usersService.findById(userId);
+
+    const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const session = this.sessionRepository.create({
+      currentHashedRefreshToken,
+      user,
+    });
+    return await this.sessionRepository.save(session);
   }
 }
