@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { instanceToPlain } from 'class-transformer';
 import { Repository } from 'typeorm';
 import { PostgresErrorCode } from '../database/postgresErrorCodes.enum';
 import { UserEntity } from './entities/user.entity';
@@ -61,7 +62,8 @@ export class UsersService {
   }
 
   async findById(id: number) {
-    return await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOneBy({ id });
+    return instanceToPlain(user);
   }
 
   async getByEmailOrNickname(username: string) {
