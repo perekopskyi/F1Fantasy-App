@@ -82,8 +82,10 @@ export class AuthService {
     return instanceToPlain(user);
   }
 
-  async invalidateAccessToken(token: string): Promise<void> {
-    console.log('🚀 TODO ~> AuthService ~> invalidateAccessToken:', token);
+  async logout(token: string): Promise<void> {
+    // TODO need fix
+    const { userId }: TokenPayload = await this.jwtService.verifyAsync(token);
+    await this.jwtService.signAsync({ userId }, { expiresIn: '1' });
   }
 
   public getJwtRefreshToken(userId: number) {

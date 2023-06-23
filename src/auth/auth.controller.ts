@@ -41,6 +41,7 @@ export class AuthController {
 
   @ApiBearerAuth('Authorization')
   @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
   @Post('logout')
   public async logout(@Headers('Authorization') accessToken: string) {
     if (!accessToken) {
@@ -51,7 +52,7 @@ export class AuthController {
     }
 
     const token = accessToken.split(' ')[1];
-    await this.authService.invalidateAccessToken(token);
+    await this.authService.logout(token);
 
     return {
       success: true,
