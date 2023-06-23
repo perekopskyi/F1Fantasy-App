@@ -4,6 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TeamsModule } from './teams/teams.module';
 import entities from './typeorm';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,15 +20,16 @@ import entities from './typeorm';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
         entities: entities,
-        synchronize: true,
+        synchronize: false,
       }),
       inject: [ConfigService],
     }),
     DriversModule,
     TeamsModule,
+    UsersModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
 })
-
-export class AppModule { }
+export class AppModule {}

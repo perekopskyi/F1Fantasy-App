@@ -11,7 +11,7 @@ export class CreateUserDto {
   countryCode: string;
 
   @ApiProperty({ default: 'testNick' })
-  nickName: string;
+  nickname: string;
 
   @ApiProperty({ default: 'John' })
   firstName: string;
