@@ -29,13 +29,13 @@ export class AuthController {
       throw new BadRequestException();
     }
 
-    const token = this.authService.getJwtToken(user.id);
-    await this.authService.saveAccessToken(token);
+    const payload = this.authService.getJwtToken(user.id);
+    await this.authService.saveAccessToken(payload);
 
     return {
       success: true,
       data: {
-        access_token: token,
+        access_token: payload.token,
       },
     };
   }
@@ -51,7 +51,8 @@ export class AuthController {
       );
     }
 
-    await this.authService.invalidateAccessToken(accessToken);
+    const token = accessToken.split(' ')[1];
+    await this.authService.invalidateAccessToken(token);
 
     return {
       success: true,

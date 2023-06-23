@@ -10,7 +10,7 @@ import { Repository } from 'typeorm';
 import { instanceToPlain } from 'class-transformer';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { TokenPayload } from './interfaces/payload.interface';
+import { ActiveToken, TokenPayload } from './interfaces/payload.interface';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SessionEntity } from '../session/session.entity';
@@ -66,20 +66,33 @@ export class AuthService {
     }
   }
 
-  getJwtToken(userId: number) {
+  getJwtToken(userId: number): ActiveToken {
     const payload: TokenPayload = { userId };
+    const token = this.jwtService.sign(payload, { expiresIn: '1h' });
+    return { userId, token };
+  }
 
-    const token = this.jwtService.sign(payload);
-    return token;
+  async validateUser(payload: ActiveToken) {
+    const activeToken = await this.sessionRepository.findOne({
+      where: { token: payload.token },
+    });
+
+    const user = await this.usersService.findById(activeToken.user);
+    return instanceToPlain(user);
   }
 
   async invalidateAccessToken(token: string): Promise<void> {
     // Find and remove active access token
-    await this.sessionRepository.delete(token);
+    const activeToken = await this.sessionRepository.findOne({
+      where: { token },
+    });
+    await this.sessionRepository.delete(activeToken.id);
   }
 
-  async saveAccessToken(token: string) {
-    const activeToken = this.sessionRepository.create({ token });
-    await this.sessionRepository.save(activeToken);
+  async saveAccessToken(activeToken: ActiveToken) {
+    const createdActiveToken = this.sessionRepository.create({
+      ...activeToken,
+    });
+    await this.sessionRepository.save(createdActiveToken);
   }
 }

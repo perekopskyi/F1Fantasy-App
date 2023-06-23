@@ -19,7 +19,7 @@ export class SessionEntity {
   // @Column()
   // currentHashedRefreshToken: string;
 
-  @OneToOne(() => UserEntity)
+  @OneToOne(() => UserEntity, (user) => user.id)
   @JoinColumn()
-  user: UserEntity;
+  user: number;
 }
