@@ -1,5 +1,6 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { config } from 'dotenv';
+import { join } from 'path';
 import entities from '../typeorm';
 config();
 
@@ -12,7 +13,7 @@ const OPTIONS = {
   database: process.env.DB_NAME,
 
   entities,
-  migrations: ['/src/database/migrations/*{.ts,.js}'],
+  migrations: [join(__dirname, '../database/migrations/*.{ts,js}')],
   logging: true,
   synchronize: false,
 } as DataSourceOptions;

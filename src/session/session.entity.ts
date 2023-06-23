@@ -15,8 +15,9 @@ export class SessionEntity {
   @Column({ nullable: true })
   token: string;
 
-  @Column()
-  currentHashedRefreshToken: string;
+  // TODO Refresh token
+  // @Column()
+  // currentHashedRefreshToken: string;
 
   @OneToOne(() => UserEntity)
   @JoinColumn()

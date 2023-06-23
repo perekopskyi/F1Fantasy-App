@@ -5,8 +5,9 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
+import { instanceToPlain } from 'class-transformer';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { TokenPayload } from './interfaces/payload.interface';
@@ -57,14 +58,9 @@ export class AuthService {
   }
 
   async register(userDto: CreateUserDto) {
-    const hashedPassword = await bcrypt.hash(userDto.password, 10);
-
     try {
-      const user = await this.usersService.create({
-        ...userDto,
-        password: hashedPassword,
-      });
-      return user;
+      const createdUser = await this.usersService.create(userDto);
+      return instanceToPlain(createdUser);
     } catch (error) {
       throw new BadRequestException(error.response);
     }
