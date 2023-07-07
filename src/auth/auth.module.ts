@@ -9,10 +9,11 @@ import { UsersService } from '../users/users.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
+import { ResetPasswordEntity } from './entities/reset-password.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, SessionEntity]),
+    TypeOrmModule.forFeature([UserEntity, SessionEntity, ResetPasswordEntity]),
     PassportModule.register({
       defaultStrategy: 'jwt',
       property: 'user',

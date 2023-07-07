@@ -14,6 +14,8 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwtAuth.guard';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -39,38 +41,43 @@ export class AuthController {
     };
   }
 
-  @ApiBearerAuth('Authorization')
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.OK)
-  @Post('logout')
-  public async logout(@Headers('Authorization') accessToken: string) {
-    if (!accessToken) {
-      throw new HttpException(
-        'Access token is missing',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
+  // @ApiBearerAuth('Authorization')
+  // @UseGuards(JwtAuthGuard)
+  // @HttpCode(HttpStatus.OK)
+  // @Post('logout')
+  // public async logout(@Headers('Authorization') accessToken: string) {
+  //   if (!accessToken) {
+  //     throw new HttpException(
+  //       'Access token is missing',
+  //       HttpStatus.UNAUTHORIZED,
+  //     );
+  //   }
 
-    const token = accessToken.split(' ')[1];
-    await this.authService.logout(token);
+  //   const token = accessToken.split(' ')[1];
+  //   await this.authService.logout(token);
 
-    return {
-      success: true,
-    };
-  }
+  //   return {
+  //     success: true,
+  //   };
+  // }
 
   @Post('register')
   public async register(@Body() userDto: CreateUserDto) {
     return this.authService.register(userDto);
   }
 
-  @Post()
-  public async forgotPassword() {
-    // TODO
+  @HttpCode(HttpStatus.OK)
+  @Post('forgotPassword')
+  public async forgotPassword(@Body() email: ForgotPasswordDto) {
+    await this.authService.forgotPassword(email);
+    return {
+      success: true,
+    };
   }
 
-  @Post()
-  public async resetPassword() {
-    // TODO
+  @HttpCode(HttpStatus.OK)
+  @Post('resetPassword')
+  public async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto);
   }
 }
