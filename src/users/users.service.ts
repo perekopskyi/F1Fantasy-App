@@ -67,7 +67,7 @@ export class UsersService {
   }
 
   async getByEmailOrNickname(username: string) {
-    return this.userRepository
+    return await this.userRepository
       .createQueryBuilder('user')
       .where('user.email = :username OR user.nickname = :username', {
         username,

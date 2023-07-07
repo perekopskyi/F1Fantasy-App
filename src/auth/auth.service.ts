@@ -1,9 +1,11 @@
 import {
+  BadGatewayException,
   BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -92,16 +94,20 @@ export class AuthService {
 
   async forgotPassword({ email }: ForgotPasswordDto) {
     // Check if user exists
-    const user = this.usersService.getByEmailOrNickname(email);
+    const user = await this.usersService.getByEmailOrNickname(email);
     // If user not existed do nothing
-    if (!user) return;
+    if (!user) throw new BadRequestException();
 
     const code = createCode();
-
     try {
       const createdCode = this.resetPasswordRepository.create({ email, code });
       sendEmail(createdCode);
       await this.resetPasswordRepository.save(createdCode);
+
+      return {
+        success: true,
+        message: 'Reset code was created!',
+      };
     } catch (error) {
       console.log('🚀 ~> AuthService ~> error:', error);
       throw new InternalServerErrorException('Something went wrong');
